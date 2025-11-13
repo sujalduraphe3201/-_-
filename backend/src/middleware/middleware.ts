@@ -17,24 +17,28 @@ export function authMiddleware(
   const authHeader = req.headers.authorization;
 
   if (!authHeader) {
-    return res.status(401).json({ message: "Authorization header missing" });
+    res.status(401).json({ message: "Authorization header missing" });
+    return
   }
 
   const token = authHeader.split(" ")[1];
   if (!token) {
-    return res.status(401).json({ message: "Token missing or malformed" });
+    res.status(401).json({ message: "Token missing or malformed" });
+    return
   }
 
   try {
     const decoded = verifyUser(token) as JwtPayload & { id?: number };
 
     if (!decoded?.id) {
-      return res.status(403).json({ message: "Invalid or expired token" });
+      res.status(403).json({ message: "Invalid or expired token" });
+      return 
     }
 
     req.userId = decoded.id;
     next();
   } catch {
-    return res.status(401).json({ message: "Invalid or expired token" });
+    res.status(401).json({ message: "Invalid or expired token" });
+    return
   }
 }

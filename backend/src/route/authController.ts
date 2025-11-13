@@ -35,6 +35,7 @@ export async function signup(req: Request, res: Response, next: NextFunction) {
       message: "User created successfully",
       user,
     });
+    console.log("User created successfully");
     return;
   } catch (err) {
     console.error("Signup error:", err);
@@ -72,6 +73,8 @@ export async function signin(req: Request, res: Response, next: NextFunction) {
       token,
       user: { id: user.id, name: user.name, email: user.email },
     });
+    console.log("User logged in successfully");
+
     return;
   } catch (err) {
     console.error("Signin error:", err);

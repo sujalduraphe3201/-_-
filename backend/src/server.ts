@@ -4,6 +4,7 @@ import express from "express";
 import cors from "cors";
 import authRoutes from "./route/userRoutes.js";
 import flowRoute from "./route/flows.js";
+import { errorHandler } from "./middleware/errorHandler.js";
 
 const app = express();
 
@@ -16,7 +17,7 @@ app.get("/", (_req, res) => {
 
 app.use("/api/auth", authRoutes);
 app.use("/api/flows", flowRoute);
-
+app.use(errorHandler);
 const PORT = process.env.PORT || 4000;
 
 app.listen(PORT, () => {
