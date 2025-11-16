@@ -1,3 +1,4 @@
+import { mountBullBoard } from "./queue/bullBoard.js";
 import dotenv from "dotenv";
 dotenv.config({ path: "./.env" });
 import express from "express";
@@ -5,6 +6,7 @@ import cors from "cors";
 import authRoutes from "./route/userRoutes.js";
 import flowRoute from "./route/flows.js";
 import { errorHandler } from "./middleware/errorHandler.js";
+import { rateLimiter } from "./middleware/rateLimiter.js";
 
 const app = express();
 
@@ -18,8 +20,10 @@ app.get("/", (_req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/flows", flowRoute);
 app.use(errorHandler);
-const PORT = process.env.PORT || 4000;
+app.use(rateLimiter);
+mountBullBoard(app);
 
+const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
   console.log(` Server is listening on port ${PORT}`);
 });

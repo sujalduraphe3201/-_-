@@ -4,6 +4,8 @@ export function createRedisConnection(): Redis {
   const redis = new Redis({
     host: process.env.REDIS_HOST || "127.0.0.1",
     port: Number(process.env.REDIS_PORT || 6379),
+    maxRetriesPerRequest: null,
+    enableReadyCheck: false,
   });
 
   redis.on("connect", () => console.log("✅ Redis connected"));
@@ -11,4 +13,4 @@ export function createRedisConnection(): Redis {
 
   return redis;
 }
-// connection with redis is done in this file 
+// connection with redis is done in this file

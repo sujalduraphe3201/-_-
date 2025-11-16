@@ -3,28 +3,24 @@ import { createRedisConnection } from "./connection.js";
 
 const connection = createRedisConnection();
 
-
 const worker = new Worker(
-  "flowforge",
+  "flowQueue",
   async (job: Job) => {
     console.log(`👷 Processing job ${job.id}: ${job.name}`, job.data);
 
     switch (job.name) {
       case "send-email":
-        await new Promise((r) => setTimeout(r, 2000));
         console.log(`📧 Email sent to ${job.data.to}`);
         break;
       case "webhook":
-        await new Promise((r) => setTimeout(r, 2000));
         console.log(`📧 Email sent to ${job.data.to}`);
         break;
 
       case "generate-report":
-        await new Promise((r) => setTimeout(r, 2000));
         console.log(`📧 Email sent to ${job.data.to}`);
         break;
       default:
-        throw new Error(` Unknown job type: ${job.name}`);
+        console.log(` Unknown job type: ${job.name}`);
     }
     return { ok: true };
   },
