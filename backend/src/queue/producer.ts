@@ -21,6 +21,18 @@ export async function findJob(jobId: string) {
   }
   return job;
 }
+export async function getAllJobs() {
+  const jobs = await flowQueue.getJobs(
+    ["waiting", "active", "completed", "failed", "delayed"],
+    0,
+    1000
+  );
+  if (!jobs) {
+    console.log(`Error while fetching jobs`);
+    return;
+  }
+  return jobs || [];
+}
 
 export async function updateJob(jobId: string, payload: any) {
   const job = await flowQueue.getJob(jobId);

@@ -1,8 +1,59 @@
 import { Router } from "express";
 import { authMiddleware } from "../middleware/middleware.js";
-import { addJob, deleteJob, findJob, updateJob } from "../queue/producer.js";
+import {
+  addJob,
+  deleteJob,
+  findJob,
+  getAllJobs,
+  updateJob,
+} from "../queue/producer.js";
 
 const router = Router();
+
+router.get("/jobs", authMiddleware, async (req, res) => {
+  try {
+    const jobs = await getAllJobs();
+
+    res.json({ jobs });
+  } catch (err) {
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+router.get("/job/:id", authMiddleware, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!id) {
+      res.status(400).json({ error: "Job ID is required" });
+      return;
+    }
+
+    const job = await findJob(id);
+    if (!job) {
+      res.status(404).json({ error: "Job not found" });
+      return;
+    }
+
+    const state = await job.getState(); // waiting, active, completed, failed
+    const returnValue = await job.returnvalue;
+    const failedReason = job.failedReason;
+
+    res.json({
+      id: job.id,
+      name: job.name,
+      data: job.data,
+      state,
+      attemptsMade: job.attemptsMade,
+      finishedOn: job.finishedOn,
+      timestamp: job.timestamp,
+      returnValue,
+      failedReason,
+    });
+  } catch (err) {
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
 
 // CREATE JOB ----------------------------------------------------
 router.post("/job", authMiddleware, async (req, res) => {
@@ -11,13 +62,13 @@ router.post("/job", authMiddleware, async (req, res) => {
 
     if (!type || !payload) {
       res.status(400).json({ error: "Missing type or payload" });
-      return 
+      return;
     }
 
     const allowed = ["send-email", "generate-report", "webhook"];
     if (!allowed.includes(type)) {
       res.status(400).json({ error: "Invalid job type" });
-      return 
+      return;
     }
 
     const job = await addJob(type, payload, {
@@ -39,13 +90,13 @@ router.put("/job/:id", authMiddleware, async (req, res) => {
 
     if (!id) {
       res.status(400).json({ message: "job id is required" });
-      return
+      return;
     }
 
     const existing = await findJob(id);
     if (!existing) {
       res.status(404).json({ message: "job not found" });
-      return
+      return;
     }
 
     await updateJob(id, payload);
@@ -64,7 +115,7 @@ router.delete("/job/:id", authMiddleware, async (req, res) => {
     const existing = await findJob(id);
     if (!existing) {
       res.status(404).json({ message: "job not found" });
-      return
+      return;
     }
 
     await deleteJob(id);
